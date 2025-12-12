@@ -8,7 +8,7 @@ trigger:
 variables:
   acrName: "guruacr.azurecr.io"
   imageName: "content-agent"
-  dockerFilePath: "EY-test/Dockerfile"
+  dockerFilePath: "Dockerfile"
   buildPlatform: "linux/amd64,linux/arm64"
   trivyCache: "$(Agent.HomeDirectory)/.cache/trivy"
 
