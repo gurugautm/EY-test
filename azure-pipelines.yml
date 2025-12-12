@@ -6,56 +6,41 @@ trigger:
   - production
 
 variables:
-  # Your ACR name → example: mycompanyacr.azurecr.io
   acrName: "guruacr.azurecr.io"
-
   imageName: "content-agent"
   dockerFilePath: "EY-test/Dockerfile"
   buildPlatform: "linux/amd64,linux/arm64"
-
-  # Trivy / Aqua scan cache
   trivyCache: "$(Agent.HomeDirectory)/.cache/trivy"
 
-# ---------
-# Use your agent pool
-# ---------
 pool:
   vmImage: "ubuntu-latest"
 
 steps:
-
-# ------------------------------
-# 1. Install Buildx
-# ------------------------------
+# 0. (Optional) Check Docker & buildx exist
 - script: |
-    echo "Installing Docker Buildx..."
-    mkdir -p ~/.docker/cli-plugins/
-    curl -L https://github.com/docker/buildx/releases/latest/download/buildx-linux-amd64 -o ~/.docker/cli-plugins/docker-buildx
-    chmod +x ~/.docker/cli-plugins/docker-buildx
+    docker version
     docker buildx version
-  displayName: "Install Docker Buildx"
+  displayName: "Check Docker & Buildx"
 
-# ------------------------------
-# 2. Login to ACR
-# ------------------------------
+# 1. Login to ACR (service connection: guru-acr)
 - task: Docker@2
   displayName: "Login to ACR"
   inputs:
     command: "login"
     containerRegistry: "guru-acr"
 
-# ------------------------------
-# 3. Create Buildx Builder
-# ------------------------------
+# 2. Create Buildx Builder
 - script: |
-    docker buildx create --name multiarch --use
+    set -e
+    echo "Creating buildx builder..."
+    docker buildx create --name multiarch --driver docker-container --use
     docker buildx inspect --bootstrap
   displayName: "Create multi-arch builder"
 
-# ------------------------------
-# 4. Multi-arch Docker Build & Push
-# ------------------------------
+# 3. Multi-arch Docker Build & Push
 - script: |
+    set -e
+    echo "Building and pushing multi-arch image..."
     docker buildx build \
       --platform $(buildPlatform) \
       --file $(dockerFilePath) \
@@ -65,16 +50,15 @@ steps:
       .
   displayName: "Build & Push Multi-Arch Docker Image"
 
-# ------------------------------
-# 5. Aqua Scanner (Trivy Local Mode)
-# ------------------------------
+# 4. Aqua Scanner (Trivy Local Mode)
 - task: Docker@2
-  displayName: 'Docker login (service connection)'
+  displayName: 'Docker login (service connection) for Aqua'
   inputs:
     containerRegistry: 'login aqua'
     command: 'login'
 
 - task: aquasecScanner@4
+  displayName: "Aqua Scan multi-arch image"
   inputs:
     image: "$(acrName)/$(imageName):$(Build.BuildId)"
     scanType: 'local'
@@ -83,10 +67,7 @@ steps:
     connection: 'guru-host'
     arguments: "--cache-dir $(trivyCache)"
 
-
-# ------------------------------
-# 6. Save image info for release pipeline
-# ------------------------------
+# 5. Save image info for release pipeline
 - script: |
     echo "{\"image\":\"$(acrName)/$(imageName):$(Build.BuildId)\"}" > $(Pipeline.Workspace)/image-tags.json
   displayName: "Create image-tags JSON"
