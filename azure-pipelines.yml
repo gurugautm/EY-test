@@ -50,6 +50,9 @@ steps:
       .
   displayName: "Build & Push Multi-Arch Docker Image"
 
+- script: 
+    docker images
+
 # 4. Aqua Scanner (Trivy Local Mode)
 - task: Docker@2
   displayName: 'Docker login (service connection) for Aqua'
