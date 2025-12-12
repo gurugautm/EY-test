@@ -29,6 +29,7 @@ steps:
     command: "login"
     containerRegistry: "guru-acr"
 
+
 - task: Docker@2
   displayName: "Build content-agent image (local for scan)"
   inputs:
@@ -40,8 +41,31 @@ steps:
     tags: |
       $(Build.BuildId)
 
+# 2. Create Buildx Builder
+- script: |
+    set -e
+    echo "Creating buildx builder..."
+    docker buildx create --name multiarch --driver docker-container --use
+    docker buildx inspect --bootstrap
+  displayName: "Create multi-arch builder"
+
+# 3. Multi-arch Docker Build & Push
+- script: |
+    set -e
+    echo "Building and pushing multi-arch image..."
+    docker buildx build \
+      --platform $(buildPlatform) \
+      --file $(dockerFilePath) \
+      --tag $(acrName)/$(imageName):$(Build.BuildId) \
+      --tag $(acrName)/$(imageName):latest \
+      --push \
+      .
+  displayName: "Build & Push Multi-Arch Docker Image"
+
 - script: 
     docker images
+    docker pull "$(acrName)/$(imageName):$(Build.BuildId)"
+    docker inspect "$(acrName)/$(imageName):$(Build.BuildId)"
 
 # 4. Aqua Scanner (Trivy Local Mode)
 - task: Docker@2
