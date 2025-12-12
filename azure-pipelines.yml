@@ -62,10 +62,11 @@ steps:
       .
   displayName: "Build & Push Multi-Arch Docker Image"
 
-- script: 
+- script: |
     docker images
     docker pull "$(acrName)/$(imageName):$(Build.BuildId)"
     docker inspect "$(acrName)/$(imageName):$(Build.BuildId)"
+  displayName: "Debug: docker images and inspect"
 
 # 4. Aqua Scanner (Trivy Local Mode)
 - task: Docker@2
