@@ -1,0 +1,16 @@
+# Core runtime packages (example)
+Flask==2.3.2
+requests==2.31.0
+
+# Logging & utils
+python-json-logger==2.0.7
+
+# Security / environment variable handling
+python-dotenv==1.0.1
+
+# If your app uses async
+# aiohttp==3.9.1
+
+# If your app uses scheduling
+# schedule==1.2.1
+
