@@ -64,11 +64,14 @@ steps:
   displayName: "Aqua Scan multi-arch image"
   inputs:
     image: "$(acrName)/$(imageName):$(Build.BuildId)"
-    scanType: 'local'
+    scanType: 'registry'
     containerRuntime: 'docker'
     scanner: 'registry.aquasec.com/scanner:2022.4.818'
     connection: 'guru-host'
+    registry: 'guru-acr'
+    register: true
     arguments: "--cache-dir $(trivyCache)"
+    
 
 # 5. Save image info for release pipeline
 - script: |
