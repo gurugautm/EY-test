@@ -23,4 +23,5 @@ COPY --from=builder /app /app
 ENV PATH=/root/.local/bin:$PATH
 
 CMD ["python", "main.py"]
-
+ARG GIT_SHA
+LABEL git_sha=${GIT_SHA}
