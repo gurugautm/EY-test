@@ -18,6 +18,7 @@ pool:
 steps:
 # 0. (Optional) Check Docker & buildx exist
 - script: |
+    cat /etc/os-release
     docker version
     docker buildx version
   displayName: "Check Docker & Buildx"
