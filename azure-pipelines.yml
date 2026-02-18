@@ -23,6 +23,37 @@ steps:
     docker buildx version
   displayName: "Check Docker & Buildx"
 
+- script: |
+    cat /etc/os-release
+    sudo systemctl stop docker docker.socket containerd 2>/dev/null || true && \
+    sudo apt-get purge -y docker-ce docker-ce-cli docker-ce-rootless-extras docker-buildx-plugin docker-compose-plugin docker.io docker-compose containerd.io 2>/dev/null || true && \
+    sudo apt-get autoremove -y && \
+    sudo apt-get autoclean -y && \
+    sudo rm -rf /var/lib/docker /var/lib/containerd /etc/docker /etc/apt/sources.list.d/docker.list /etc/apt/keyrings/docker.asc && \
+    sudo groupdel docker 2>/dev/null || true
+    docker version
+    docker buildx version
+  displayName: "docker uninstall"
+
+- script: |
+    cat /etc/os-release
+    sudo apt-get update -y && \
+    sudo apt-get install -y ca-certificates curl gnupg && \
+    sudo install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg --yes && \
+    sudo chmod a+r /etc/apt/keyrings/docker.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+    sudo apt-get update -y && \
+    sudo apt-get install -y \
+    docker-ce=5:28.2.2-1~ubuntu.22.04~jammy \
+    docker-ce-cli=5:28.2.2-1~ubuntu.22.04~jammy \
+    containerd.io \
+    docker-buildx-plugin \
+    docker-compose-plugin
+    docker version
+    docker buildx version
+  displayName: "docker version 28"    
+
 # 1. Login to ACR (service connection: guru-acr)
 - task: Docker@2
   displayName: "Login to ACR"
