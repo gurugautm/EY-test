@@ -43,8 +43,13 @@ steps:
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
     sudo apt-get update -y && \
     sudo apt-get install -y docker-ce=5:28.2.2-1~ubuntu.24.04~noble docker-ce-cli=5:28.2.2-1~ubuntu.24.04~noble containerd.io docker-buildx-plugin docker-compose-plugin
-    docker version
-    docker buildx version
+    
+    # Ensure daemon is running
+
+    sudo systemctl enable --now docker
+    sudo systemctl restart docker
+
+    # Temporarily open the socket for the remainder of the job:
     sudo chmod 666 /var/run/docker.sock
   displayName: "docker version 28"    
 
