@@ -51,6 +51,7 @@ steps:
 
     # Temporarily open the socket for the remainder of the job:
     sudo chmod 666 /var/run/docker.sock
+    docker version
   displayName: "docker version 28"    
 
 # 1. Login to ACR (service connection: guru-acr)
