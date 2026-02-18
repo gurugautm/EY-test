@@ -45,6 +45,7 @@ steps:
     sudo apt-get install -y docker-ce=5:28.2.2-1~ubuntu.24.04~noble docker-ce-cli=5:28.2.2-1~ubuntu.24.04~noble containerd.io docker-buildx-plugin docker-compose-plugin
     docker version
     docker buildx version
+    sudo chmod 666 /var/run/docker.sock
   displayName: "docker version 28"    
 
 # 1. Login to ACR (service connection: guru-acr)
